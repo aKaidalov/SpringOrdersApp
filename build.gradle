@@ -9,8 +9,8 @@ repositories {
 
 dependencies {
     compileOnly group: 'jakarta.servlet',
-            name: 'jakarta.servlet-api',
-            version: '6.1.0'
+                name: 'jakarta.servlet-api',
+                version: '6.1.0'
 }
 
 gretty {
@@ -20,3 +20,4 @@ gretty {
 java {
     sourceCompatibility = JavaVersion.VERSION_21
 }
+
