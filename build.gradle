@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'org.gretty' version '4.1.5'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly group: 'jakarta.servlet',
+            name: 'jakarta.servlet-api',
+            version: '6.1.0'
+}
+
+gretty {
+    contextPath = '/'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+}
