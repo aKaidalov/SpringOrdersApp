@@ -36,10 +36,8 @@ public class OrderMapper {
 
     private Order createOrderObj(Map<String, String> attributes) {
         Order order = new Order(attributes.get("orderNumber"));
-        if (attributes.containsKey("id")) {
-            if (!"null".equals(attributes.get("id"))) {
-                order.setId(Long.parseLong(attributes.get("id")));
-            }
+        if (attributes.containsKey("id") && !"null".equals(attributes.get("id"))) {
+            order.setId(Long.parseLong(attributes.get("id")));
         }
         return order;
     }
