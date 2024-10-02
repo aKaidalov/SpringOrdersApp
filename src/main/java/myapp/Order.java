@@ -1,42 +1,33 @@
 package myapp;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Order {
 
     private Long id;
     private String orderNumber;
-    private List<OrderRow> orderRows = new ArrayList<>(); // Используем список для хранения строк заказа
-
-    public Order() {}
+    private List<OrderRow> orderRows = new ArrayList<>();
 
     public Order(String orderNumber) {
         this.orderNumber = orderNumber;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(String orderNumber) {
-        this.orderNumber = orderNumber;
-    }
-
     public List<OrderRow> getOrderRows() {
-        return new ArrayList<>(orderRows);
+        return new ArrayList<>(orderRows); // Возвращаем копию списка для безопасности
     }
 
     public void setOrderRows(List<OrderRow> orderRows) {
-        this.orderRows = new ArrayList<>(orderRows);
+        this.orderRows = new ArrayList<>(orderRows); // Копируем список
     }
 
     public void addOrderRow(OrderRow orderRow) {
