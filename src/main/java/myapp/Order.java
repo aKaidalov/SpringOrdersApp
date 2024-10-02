@@ -23,11 +23,11 @@ public class Order {
     }
 
     public List<OrderRow> getOrderRows() {
-        return new ArrayList<>(orderRows); // Возвращаем копию списка для безопасности
+        return new ArrayList<>(orderRows);
     }
 
     public void setOrderRows(List<OrderRow> orderRows) {
-        this.orderRows = new ArrayList<>(orderRows); // Копируем список
+        this.orderRows = new ArrayList<>(orderRows);
     }
 
     public void addOrderRow(OrderRow orderRow) {
