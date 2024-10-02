@@ -14,7 +14,7 @@ import java.io.IOException;
 public class OrdersFormServlet extends HttpServlet {
 
     private long orderId = 1;
-    ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
