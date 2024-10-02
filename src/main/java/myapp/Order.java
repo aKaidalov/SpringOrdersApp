@@ -1,17 +1,19 @@
 package myapp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Order {
+
     private Long id;
     private String orderNumber;
-    private OrderRow[] orderRows;
-
+    private List<OrderRow> orderRows = new ArrayList<>(); // Используем список для хранения строк заказа
 
     public Order() {}
 
     public Order(String orderNumber) {
         this.orderNumber = orderNumber;
     }
-
 
     public Long getId() {
         return id;
@@ -29,11 +31,15 @@ public class Order {
         this.orderNumber = orderNumber;
     }
 
-    public OrderRow[] getOrderRows() {
-        return orderRows;
+    public List<OrderRow> getOrderRows() {
+        return new ArrayList<>(orderRows);
     }
 
-    public void setOrderRows(OrderRow[] orderRows) {
-        this.orderRows = orderRows;
+    public void setOrderRows(List<OrderRow> orderRows) {
+        this.orderRows = new ArrayList<>(orderRows);
+    }
+
+    public void addOrderRow(OrderRow orderRow) {
+        this.orderRows.add(orderRow);
     }
 }
