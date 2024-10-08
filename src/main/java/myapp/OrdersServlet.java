@@ -1,50 +1,69 @@
 package myapp;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.sql.DataSource;
 
 
 @WebServlet("/api/orders")
 public class OrdersServlet extends HttpServlet {
 
-    private long orderId = 1;
+    private OrderDao orderDao;
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void init() throws ServletException {
+        orderDao = createDbConnection();
+    }
 
-        String input = req.getReader().readLine();
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        response.setContentType("application/json");
+
+        String input = request.getReader().readLine();
         Order order = new ObjectMapper().readValue(input, Order.class);
 
-        if (order.getId() == null) {
-            order.setId(generateId());
-        }
+        Order insertedOrder = orderDao.insertOrder(order);
 
-        getServletContext().setAttribute(order.getId().toString(), order);
-
-        createResponse(resp, order);
+        new ObjectMapper().writeValue(response.getOutputStream(), insertedOrder);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        String idFromReq = req.getParameter("id");
+        response.setContentType("application/json");
 
-        Order order = (Order) getServletContext().getAttribute(idFromReq);
+        String orderId = request.getParameter("id");
 
-        createResponse(resp, order);
+        if (orderId != null) {
+
+            long id = Long.parseLong(orderId);
+            Order order = orderDao.getOrderById(id);
+
+            if (order != null) {
+                new ObjectMapper().writeValue(response.getOutputStream(), order);
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } else {
+
+            List<Order> orders = orderDao.getAllOrders();
+
+            new ObjectMapper().writeValue(response.getOutputStream(), orders);
+
+        }
     }
 
-    private void createResponse(HttpServletResponse resp, Order order) throws IOException {
-        String output = new ObjectMapper().writeValueAsString(order);
-        resp.setContentType("application/json");
-        resp.getWriter().write(output);
-    }
-
-    private synchronized long generateId() {
-        return orderId++;
+    private OrderDao createDbConnection() {
+        DataSource dataSource = (DataSource) getServletContext().getAttribute("dataSource");
+        return new OrderDao(dataSource);
     }
 }

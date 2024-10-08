@@ -16,6 +16,10 @@ dependencies {
             name: 'jakarta.servlet-api',
             version: '6.1.0'
 
+    implementation group: 'org.postgresql',
+            name: 'postgresql',
+            version: '42.7.3'
+
     compileOnly 'org.projectlombok:lombok:1.18.34'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
