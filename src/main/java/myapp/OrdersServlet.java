@@ -12,13 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class OrdersServlet extends HttpServlet {
 
     private long orderId = 1;
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         String input = req.getReader().readLine();
-        Order order = objectMapper.readValue(input, Order.class);
+        Order order = new ObjectMapper().readValue(input, Order.class);
 
         if (order.getId() == null) {
             order.setId(generateId());
@@ -40,7 +39,7 @@ public class OrdersServlet extends HttpServlet {
     }
 
     private void createResponse(HttpServletResponse resp, Order order) throws IOException {
-        String output = objectMapper.writeValueAsString(order);
+        String output = new ObjectMapper().writeValueAsString(order);
         resp.setContentType("application/json");
         resp.getWriter().write(output);
     }

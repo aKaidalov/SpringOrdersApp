@@ -1,10 +1,8 @@
 package myapp;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
 public class OrderRow {
     private String itemName;
     private int quantity;
