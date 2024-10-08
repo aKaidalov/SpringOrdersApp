@@ -41,36 +41,37 @@ public class DevDataSource implements DataSource {
 
     @Override
     public PrintWriter getLogWriter() throws SQLException {
-        throw new RuntimeException("not implemented");
+        throw new RuntimeException("not implemente");
     }
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-        throw new RuntimeException("not implemented");
+        throw new RuntimeException("not implement");
     }
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-        throw new RuntimeException("not implemented");
+        throw new RuntimeException("not implemen");
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-        throw new RuntimeException("not implemented");
+        throw new RuntimeException("not impleme");
     }
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        throw new RuntimeException("not implemented");
+        throw new RuntimeException("not implem");
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new RuntimeException("not implemented");
+        throw new RuntimeException("not imple");
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new RuntimeException("not implemented");
+        throw new RuntimeException("not impl");
     }
 }
+
