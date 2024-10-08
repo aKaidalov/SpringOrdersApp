@@ -30,11 +30,16 @@ public class OrdersFormServlet extends HttpServlet {
         String headerAccept = req.getHeader("Accept");
 
         if (headerAccept != null && headerAccept.contains("application/json")) {
+
             String output = new ObjectMapper().writeValueAsString(order);
+
             resp.setContentType("application/json");
+
             resp.getWriter().write(output);
         } else {
+
             resp.setContentType("application/x-www-form-urlencoded");
+
             resp.getWriter().write("id=" + order.getId() + "&orderNumber=" + order.getOrderNumber());
         }
     }
