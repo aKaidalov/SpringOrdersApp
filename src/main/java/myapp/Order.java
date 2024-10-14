@@ -13,13 +13,16 @@ import java.util.List;
 public class Order {
     private Long id;
     private String orderNumber;
-    private List<OrderRow> orderRows = new ArrayList<>();
+    private List<OrderRow> orderRows;
 
     public Order(String orderNumber) {
         this.orderNumber = orderNumber;
     }
 
     public void addOrderRow(OrderRow orderRow) {
+        if (orderRows == null) {
+            orderRows = new ArrayList<>();
+        }
         this.orderRows.add(orderRow);
     }
 }

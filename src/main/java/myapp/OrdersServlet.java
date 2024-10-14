@@ -56,9 +56,17 @@ public class OrdersServlet extends HttpServlet {
         } else {
 
             List<Order> orders = orderDao.getAllOrders();
-
             new ObjectMapper().writeValue(response.getOutputStream(), orders);
+        }
+    }
 
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String orderId = request.getParameter("id");
+
+        if (orderId != null) {
+            long id = Long.parseLong(orderId);
+            orderDao.deleteOrder(id);
         }
     }
 

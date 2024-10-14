@@ -1,11 +1,26 @@
-
 DROP TABLE IF EXISTS orderr CASCADE;
+DROP TABLE IF EXISTS order_row CASCADE;
 
 DROP SEQUENCE IF EXISTS seq1 CASCADE;
+DROP SEQUENCE IF EXISTS seq2 CASCADE;
 
 CREATE SEQUENCE seq1 START WITH 1;
+CREATE SEQUENCE seq2 START WITH 1;
 
-CREATE TABLE orderr (
-  id BIGINT NOT NULL PRIMARY KEY DEFAULT nextval('seq1'),
-  order_number VARCHAR(255) NOT NULL
+CREATE TABLE orderr
+(
+    id           BIGINT       NOT NULL PRIMARY KEY DEFAULT nextval('seq1'),
+    order_number VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE order_row
+(
+    id        BIGINT       NOT NULL PRIMARY KEY DEFAULT nextval('seq2'),
+    order_id  BIGINT NOT NULL,
+    item_name VARCHAR(255) NOT NULL,
+    quantity INTEGER NOT NULL,
+    price INTEGER NOT NULL
+
+);
+
+
