@@ -6,6 +6,9 @@ import java.util.*;
 
 public class OrderDao {
 
+    private static final String ORDER_ID_COLUMN = "order_id";
+    private static final String ROW_ID_COLUMN = "row_id";
+
     private DataSource dataSource;
 
     public OrderDao(DataSource dataSource) {
@@ -44,7 +47,7 @@ public class OrderDao {
                 }
             }
 
-            System.out.println("----> " + updatedOrder);
+            // System.out.println("----> " + updatedOrder);
 
             return updatedOrder;
 
@@ -106,16 +109,16 @@ public class OrderDao {
 
                 if (selectedOrder == null) {
                     selectedOrder = new Order(
-                            rs.getLong("order_id"),
+                            rs.getLong(ORDER_ID_COLUMN),
                             rs.getString("order_number"),
                             new ArrayList<>()
                     );
                 }
 
-                if (rs.getLong("row_id") > 0) {
+                if (rs.getLong(ROW_ID_COLUMN) > 0) {
                     OrderRow orderRow = new OrderRow(
-                            rs.getLong("row_id"),
-                            rs.getLong("order_id"),
+                            rs.getLong(ROW_ID_COLUMN),
+                            rs.getLong(ORDER_ID_COLUMN),
                             rs.getString("item_name"),
                             rs.getInt("quantity"),
                             rs.getInt("price")
@@ -147,24 +150,24 @@ public class OrderDao {
             Order currentOrder = null;
 
             while (rs.next()) {
-                boolean firstIteration = (currentOrder == null);
-                boolean isNewOrder = (currentOrder == null || rs.getLong("order_id") != currentOrder.getId());
 
-                if (firstIteration || isNewOrder) {
+                // firstIteration || isNewOrder
+                if ((currentOrder == null) ||
+                        (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId())) {
                     // Add previous order if exists
                     if (currentOrder != null) {
                         orders.add(currentOrder);
                     }
 
-                    currentOrder = new Order(rs.getLong("order_id"),
+                    currentOrder = new Order(rs.getLong(ORDER_ID_COLUMN),
                             rs.getString("order_number"),
                             new ArrayList<>());
                 }
 
-                if (rs.getLong("row_id") > 0) {
+                if (rs.getLong(ROW_ID_COLUMN) > 0) {
                     OrderRow orderRow = new OrderRow(
-                            rs.getLong("row_id"),
-                            rs.getLong("order_id"),
+                            rs.getLong(ROW_ID_COLUMN),
+                            rs.getLong(ORDER_ID_COLUMN),
                             rs.getString("item_name"),
                             rs.getInt("quantity"),
                             rs.getInt("price")

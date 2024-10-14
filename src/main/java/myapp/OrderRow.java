@@ -14,7 +14,7 @@ public class OrderRow {
     private int quantity;
     private int price;
 
-    OrderRow(String itemName, int quantity, int price) {
+    public OrderRow(String itemName, int quantity, int price) {
         this.itemName = itemName;
         this.quantity = quantity;
         this.price = price;
