@@ -152,8 +152,7 @@ public class OrderDao {
             while (rs.next()) {
 
                 // firstIteration || isNewOrder
-                if ((currentOrder == null) ||
-                        (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId())) {
+                if (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId()) {
                     // Add previous order if exists
                     if (currentOrder != null) {
                         orders.add(currentOrder);
