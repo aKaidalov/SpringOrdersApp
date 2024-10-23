@@ -1,11 +1,12 @@
 package myapp;
 
+import config.Config;
+import config.HsqlDataSource;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import org.springframework.context.annotation.ComponentScan;
-import util.ConfigUtil;
-import util.DevDataSource;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 
 @WebListener
 public class OrdersServletListener implements ServletContextListener {
@@ -13,13 +14,14 @@ public class OrdersServletListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
 
-        try {
+        var ctx = new AnnotationConfigApplicationContext(
+                Config.class,
+                HsqlDataSource.class);
 
-            // Create data obj
-            DevDataSource dataSource = new DevDataSource(ConfigUtil.readConnectionInfo());
+        try (ctx) {
 
-            // Save data obj in ServletContex
-            sce.getServletContext().setAttribute("dataSource", dataSource);
+            sce.getServletContext().setAttribute("orderDao",
+                    ctx.getBean(OrderDao.class));
 
         } catch (Exception e) {
             throw new RuntimeException(e);

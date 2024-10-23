@@ -1,90 +1,67 @@
 package myapp;
 
-import javax.sql.DataSource;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
 import java.sql.*;
 import java.util.*;
 
+@Repository
 public class OrderDao {
 
     private static final String ORDER_ID_COLUMN = "order_id";
     private static final String ROW_ID_COLUMN = "row_id";
 
-    private DataSource dataSource;
+    private JdbcClient jdbcClient;
 
-    public OrderDao(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public OrderDao(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
     }
 
     public Order insertOrder(Order order) {
 
         String sql = "INSERT INTO orderr (order_number) VALUES (?)";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, new String[] {"id"})) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-            ps.setString(1, order.getOrderNumber());
+        jdbcClient.sql(sql)
+                .param(1, order.getOrderNumber())
+                .update(keyHolder, "id");
 
-            ps.executeUpdate();
+        // Create a new Order obj from the updated copy of og order
+        Order updatedOrder = order.withId(keyHolder.getKey().longValue());
 
-            ResultSet rs = ps.getGeneratedKeys();
-
-            if (!rs.next()) {
-                throw new SQLException("Failed to insert new ORDER");
+        if (updatedOrder.getOrderRows() != null) {
+            for (OrderRow orderRow : updatedOrder.getOrderRows()) {
+                insertOrderRow(updatedOrder.getId(), orderRow);
             }
-
-            Order updatedOrder = new Order(rs.getLong("id"),
-                    order.getOrderNumber(),
-                    new ArrayList<>());
-
-            // Insert Order Rows
-            if (order.getOrderRows() != null) {
-
-                for (OrderRow orderRow : order.getOrderRows()) {
-
-                    OrderRow updatedOrderRow = insertOrderRow(orderRow, updatedOrder);
-                    updatedOrder.addOrderRow(updatedOrderRow);
-
-                }
-            }
-
-            return updatedOrder;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
+
+        return updatedOrder;
     }
 
-    private OrderRow insertOrderRow(OrderRow orderRow, Order order) {
+    private void insertOrderRow(long orderId, OrderRow orderRow) {
 
-        String sql = "INSERT INTO order_row (order_id, item_name, quantity, price) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO order_row (order_id, item_name, quantity, price)" +
+                " VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, new String[] {"id"})) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-            ps.setLong(1,order.getId());
-            ps.setString(2, orderRow.getItemName());
-            ps.setInt(3, orderRow.getQuantity());
-            ps.setInt(4, orderRow.getPrice());
+        jdbcClient.sql(sql)
+                .param(1, orderId)
+                .param(2, orderRow.getItemName())
+                .param(3, orderRow.getQuantity())
+                .param(4, orderRow.getPrice())
+                .update(keyHolder, "id");
 
-            ps.executeUpdate();
+        Long generatedId = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
 
-            ResultSet rs = ps.getGeneratedKeys();
-
-            if (!rs.next()) {
-                throw new SQLException("Failed to insert new order ROW");
-            }
-
-            OrderRow updatedOrderRow = new OrderRow(orderRow.getItemName(),
-                    orderRow.getQuantity(),
-                    orderRow.getPrice());
-
-            updatedOrderRow.setId(rs.getLong("id"));
-            updatedOrderRow.setOrderId(order.getId());
-
-            return updatedOrderRow;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        if (generatedId != null) {
+            orderRow.setId(generatedId);
+        } else {
+            throw new RuntimeException("Failed to retrieve generated key for OrderRow");
         }
     }
 
@@ -96,40 +73,21 @@ public class OrderDao {
                 "LEFT JOIN order_row r ON o.id = r.order_id " +
                 "WHERE o.id = ?";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
-            Order selectedOrder = null;
-
-            while (rs.next()) {
-
-                if (selectedOrder == null) {
-                    selectedOrder = new Order(
-                            rs.getLong(ORDER_ID_COLUMN),
-                            rs.getString("order_number"),
-                            new ArrayList<>()
-                    );
-                }
-
-                if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                    OrderRow orderRow = new OrderRow(
-                            rs.getLong(ROW_ID_COLUMN),
-                            rs.getLong(ORDER_ID_COLUMN),
-                            rs.getString("item_name"),
-                            rs.getInt("quantity"),
-                            rs.getInt("price")
-                    );
-                    selectedOrder.addOrderRow(orderRow);
-                }
-            }
-
-            return selectedOrder;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return jdbcClient.sql(sql)
+                .param(1, id)
+                .query(rs -> {
+                    Order order = null;
+                    while (rs.next()) {
+                        if (order == null) {
+                            order = createNewOrderFromRs(rs);
+                        }
+                        if (rs.getLong(ROW_ID_COLUMN) > 0) {
+                            OrderRow orderRow = createNewOrderRowFromRs(rs);
+                            order.addOrderRow(orderRow);
+                        }
+                    }
+                    return order;
+                });
 
     }
 
@@ -139,67 +97,61 @@ public class OrderDao {
                 "FROM orderr o " +
                 "LEFT JOIN order_row r ON o.id = r.order_id";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        return jdbcClient.sql(sql)
+                .query(rs -> {
+                    List<Order> orders = new ArrayList<>();
+                    Order currentOrder = null;
 
-            ResultSet rs = ps.executeQuery();
-
-            List<Order> orders = new ArrayList<>();
-            Order currentOrder = null;
-
-            while (rs.next()) {
-
-                // firstIteration || isNewOrder
-                if (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId()) {
-                    // Add previous order if exists
+                    while (rs.next()) {
+                        // firstIteration || isNewOrder
+                        if (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId()) {
+                            // Add previous order if exists
+                            if (currentOrder != null) {
+                                orders.add(currentOrder);
+                            }
+                            currentOrder = createNewOrderFromRs(rs);
+                        }
+                        if (rs.getLong(ROW_ID_COLUMN) > 0) {
+                            OrderRow row = createNewOrderRowFromRs(rs);
+                            currentOrder.addOrderRow(row);
+                        }
+                    }
+                    // Add last order if exists
                     if (currentOrder != null) {
                         orders.add(currentOrder);
                     }
-
-                    currentOrder = new Order(rs.getLong(ORDER_ID_COLUMN),
-                            rs.getString("order_number"),
-                            new ArrayList<>());
-                }
-
-                if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                    OrderRow orderRow = new OrderRow(
-                            rs.getLong(ROW_ID_COLUMN),
-                            rs.getLong(ORDER_ID_COLUMN),
-                            rs.getString("item_name"),
-                            rs.getInt("quantity"),
-                            rs.getInt("price")
-                    );
-                    currentOrder.addOrderRow(orderRow);
-                }
-            }
-
-            // Add last order if exists
-            if (currentOrder != null) {
-                orders.add(currentOrder);
-            }
-
-            return orders;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+                    return orders;
+                });
     }
 
     public void deleteOrder(long id) {
-        try (Connection conn = dataSource.getConnection()) {
-            String sqlDeleteRows = "DELETE FROM order_row WHERE order_id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sqlDeleteRows)) {
-                ps.setLong(1, id);
-                ps.executeUpdate();
-            }
+        String sqlDeleteRows = "DELETE FROM order_row WHERE order_id = ?";
+        jdbcClient.sql(sqlDeleteRows)
+                .param(1, id)
+                .update();
 
-            String sqlDeleteOrder = "DELETE FROM orderr WHERE id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sqlDeleteOrder)) {
-                ps.setLong(1, id);
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+
+        String sqlDeleteOrder = "DELETE FROM orderr WHERE id = ?";
+        jdbcClient.sql(sqlDeleteOrder)
+                .param(1, id)
+                .update();
     }
+
+
+    private OrderRow createNewOrderRowFromRs(ResultSet rs) throws SQLException {
+        return new OrderRow(
+                rs.getLong(ROW_ID_COLUMN),
+                rs.getLong(ORDER_ID_COLUMN),
+                rs.getString("item_name"),
+                rs.getInt("quantity"),
+                rs.getInt("price")
+        );
+    }
+
+    private Order createNewOrderFromRs(ResultSet rs) throws SQLException {
+        return new Order(rs.getLong(ORDER_ID_COLUMN),
+                rs.getString("order_number"),
+                new ArrayList<>());
+    }
+
 }

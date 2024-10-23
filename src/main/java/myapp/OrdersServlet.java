@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.sql.DataSource;
+import tests.model.ValidationError;
+import tests.model.ValidationErrors;
 
 
 @WebServlet("/api/orders")
@@ -19,8 +19,8 @@ public class OrdersServlet extends HttpServlet {
     private OrderDao orderDao;
 
     @Override
-    public void init() throws ServletException {
-        orderDao = createDbConnection();
+    public void init() {
+        orderDao = (OrderDao) getServletContext().getAttribute("orderDao");
     }
 
     @Override
@@ -30,6 +30,18 @@ public class OrdersServlet extends HttpServlet {
 
         String input = request.getReader().readLine();
         Order order = new ObjectMapper().readValue(input, Order.class);
+
+        if (order.getOrderNumber().length() < 2) {
+            ValidationError error = new ValidationError("400");
+            error.addArgument("too_short_number");
+
+            ValidationErrors errors = new ValidationErrors();
+            errors.addError(error);
+
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            new ObjectMapper().writeValue(response.getOutputStream(), errors);
+            return;
+        }
 
         Order insertedOrder = orderDao.insertOrder(order);
 
@@ -68,10 +80,5 @@ public class OrdersServlet extends HttpServlet {
             long id = Long.parseLong(orderId);
             orderDao.deleteOrder(id);
         }
-    }
-
-    private OrderDao createDbConnection() {
-        DataSource dataSource = (DataSource) getServletContext().getAttribute("dataSource");
-        return new OrderDao(dataSource);
     }
 }
