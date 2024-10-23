@@ -20,7 +20,6 @@ CREATE TABLE order_row
     item_name VARCHAR(255) NOT NULL,
     quantity INTEGER NOT NULL,
     price INTEGER NOT NULL
-
 );
 
 

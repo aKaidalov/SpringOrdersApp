@@ -3,6 +3,7 @@ package myapp;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import org.springframework.context.annotation.ComponentScan;
 import util.ConfigUtil;
 import util.DevDataSource;
 
