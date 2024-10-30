@@ -1,5 +1,7 @@
 package myapp;
 
+import model.Order;
+import model.OrderRow;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -66,6 +68,8 @@ public class OrderDao {
     }
 
 
+    //TODO: replace with only one method to return List<Order>
+    // If id != null -> [Order1] else [allOrders].
     public Order getOrderById(long id) {
 
         String sql = "SELECT o.id AS order_id, o.order_number, r.id AS row_id, r.item_name, r.quantity, r.price " +
@@ -87,11 +91,11 @@ public class OrderDao {
         while (rs.next()) {
 
             if (order == null) {
-                order = createNewOrderFromRs(rs);
+                order = createOrderFromRs(rs);
             }
 
             if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                OrderRow orderRow = createNewOrderRowFromRs(rs);
+                OrderRow orderRow = createRowFromRs(rs);
                 order.addOrderRow(orderRow);
             }
         }
@@ -124,11 +128,11 @@ public class OrderDao {
                 if (currentOrder != null) {
                     orders.add(currentOrder);
                 }
-                currentOrder = createNewOrderFromRs(rs);
+                currentOrder = createOrderFromRs(rs);
             }
 
             if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                OrderRow row = createNewOrderRowFromRs(rs);
+                OrderRow row = createRowFromRs(rs);
                 currentOrder.addOrderRow(row);
             }
         }
@@ -139,6 +143,22 @@ public class OrderDao {
         }
 
         return orders;
+    }
+
+    private Order createOrderFromRs(ResultSet rs) throws SQLException {
+        return new Order(rs.getLong(ORDER_ID_COLUMN),
+                rs.getString("order_number"),
+                new ArrayList<>());
+    }
+
+    private OrderRow createRowFromRs(ResultSet rs) throws SQLException {
+        return new OrderRow(
+                rs.getLong(ROW_ID_COLUMN),
+                rs.getLong(ORDER_ID_COLUMN),
+                rs.getString("item_name"),
+                rs.getInt("quantity"),
+                rs.getInt("price")
+        );
     }
 
     public void deleteOrder(long id) {
@@ -152,23 +172,6 @@ public class OrderDao {
         jdbcClient.sql(sqlDeleteOrder)
                 .param(1, id)
                 .update();
-    }
-
-
-    private OrderRow createNewOrderRowFromRs(ResultSet rs) throws SQLException {
-        return new OrderRow(
-                rs.getLong(ROW_ID_COLUMN),
-                rs.getLong(ORDER_ID_COLUMN),
-                rs.getString("item_name"),
-                rs.getInt("quantity"),
-                rs.getInt("price")
-        );
-    }
-
-    private Order createNewOrderFromRs(ResultSet rs) throws SQLException {
-        return new Order(rs.getLong(ORDER_ID_COLUMN),
-                rs.getString("order_number"),
-                new ArrayList<>());
     }
 
 }

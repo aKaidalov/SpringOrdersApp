@@ -14,6 +14,7 @@ java {
 def jacksonDatabind = '2.17.0'
 def jakartaServletApi = '6.1.0'
 def springVersion = '6.1.13'
+def hibernateValidatorVersion = '8.0.1.Final'
 def lombokVersion = '1.18.34'
 def hsqldbVersion = '2.7.3'
 def aspectjWeaverVersion = '1.9.22'
@@ -32,11 +33,23 @@ dependencies {
 
     // Spring
     implementation group: 'org.springframework',
-            name: 'spring-context',
+            name: 'spring-webmvc',
             version: springVersion
 
     implementation group: 'org.springframework',
             name: 'spring-jdbc',
+            version: springVersion
+
+    implementation group: 'jakarta.validation',
+            name: 'jakarta.validation-api',
+            version: '3.1.0'
+
+    implementation group: 'org.hibernate',
+            name: 'hibernate-validator',
+            version: hibernateValidatorVersion
+
+    implementation group: 'org.springframework',
+            name: 'spring-context',
             version: springVersion
 
     implementation group: 'org.springframework',

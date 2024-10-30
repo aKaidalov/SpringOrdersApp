@@ -1,5 +1,7 @@
-package myapp;
+package model;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -13,8 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 @With
 public class Order {
+
     private Long id;
+
+    @NotNull
     private String orderNumber;
+
+    @Valid
+    @NotNull
     private List<OrderRow> orderRows;
 
     public Order(String orderNumber) {

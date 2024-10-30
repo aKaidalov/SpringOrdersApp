@@ -7,13 +7,20 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.sql.DataSource;
 
-
+@EnableWebMvc
 @PropertySource("classpath:application.properties")
 @ComponentScan(basePackages = {"myapp"})
 public class Config {
+
+//    private DataSource dataSource;
+//
+//    public Config(DataSource dataSource) {
+//        this.dataSource = dataSource;
+//    }
 
     @Bean
     private JdbcClient jdbcClient(DataSource dataSource) {
