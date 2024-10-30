@@ -23,16 +23,13 @@ public class Order {
 
     @Valid
     @NotNull
-    private List<OrderRow> orderRows;
+    private List<OrderRow> orderRows = new ArrayList<>();
 
     public Order(String orderNumber) {
         this.orderNumber = orderNumber;
     }
 
     public void addOrderRow(OrderRow orderRow) {
-        if (orderRows == null) {
-            orderRows = new ArrayList<>();
-        }
         this.orderRows.add(orderRow);
     }
 }

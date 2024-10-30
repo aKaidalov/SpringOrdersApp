@@ -1,5 +1,6 @@
 package config;
 
+import lombok.Data;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
@@ -13,14 +14,8 @@ import javax.sql.DataSource;
 
 @EnableWebMvc
 @PropertySource("classpath:application.properties")
-@ComponentScan(basePackages = {"myapp"})
+@ComponentScan(basePackages = {"myapp", "config"})
 public class Config {
-
-//    private DataSource dataSource;
-//
-//    public Config(DataSource dataSource) {
-//        this.dataSource = dataSource;
-//    }
 
     @Bean
     private JdbcClient jdbcClient(DataSource dataSource) {
