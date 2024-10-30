@@ -25,8 +25,7 @@ public class OrderRow {
     @Min(1)
     private int price;
 
-    //TODO: Delete constructor if not in use!
-    // Use -> .setFieldName() instead.
+    //used in Kalmo's tests
     public OrderRow(String itemName, int quantity, int price) {
         this.itemName = itemName;
         this.quantity = quantity;
