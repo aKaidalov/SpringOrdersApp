@@ -76,19 +76,27 @@ public class OrderDao {
         return jdbcClient.sql(sql)
                 .param(1, id)
                 .query(rs -> {
-                    Order order = null;
-                    while (rs.next()) {
-                        if (order == null) {
-                            order = createNewOrderFromRs(rs);
-                        }
-                        if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                            OrderRow orderRow = createNewOrderRowFromRs(rs);
-                            order.addOrderRow(orderRow);
-                        }
-                    }
-                    return order;
+                    return getOrderWithRows(rs);
                 });
 
+    }
+
+    private Order getOrderWithRows(ResultSet rs) throws SQLException {
+        Order order = null;
+
+        while (rs.next()) {
+
+            if (order == null) {
+                order = createNewOrderFromRs(rs);
+            }
+
+            if (rs.getLong(ROW_ID_COLUMN) > 0) {
+                OrderRow orderRow = createNewOrderRowFromRs(rs);
+                order.addOrderRow(orderRow);
+            }
+        }
+
+        return order;
     }
 
     public List<Order> getAllOrders() {
