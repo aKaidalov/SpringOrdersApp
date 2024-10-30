@@ -99,29 +99,38 @@ public class OrderDao {
 
         return jdbcClient.sql(sql)
                 .query(rs -> {
-                    List<Order> orders = new ArrayList<>();
-                    Order currentOrder = null;
-
-                    while (rs.next()) {
-                        // firstIteration || isNewOrder
-                        if (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId()) {
-                            // Add previous order if exists
-                            if (currentOrder != null) {
-                                orders.add(currentOrder);
-                            }
-                            currentOrder = createNewOrderFromRs(rs);
-                        }
-                        if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                            OrderRow row = createNewOrderRowFromRs(rs);
-                            currentOrder.addOrderRow(row);
-                        }
-                    }
-                    // Add last order if exists
-                    if (currentOrder != null) {
-                        orders.add(currentOrder);
-                    }
-                    return orders;
+                    return getOrderList(rs);
                 });
+    }
+
+    private List<Order> getOrderList(ResultSet rs) throws SQLException {
+        List<Order> orders = new ArrayList<>();
+        Order currentOrder = null;
+
+        while (rs.next()) {
+
+            // firstIteration || isNewOrder
+            if (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId()) {
+
+                // Add previous order if exists
+                if (currentOrder != null) {
+                    orders.add(currentOrder);
+                }
+                currentOrder = createNewOrderFromRs(rs);
+            }
+
+            if (rs.getLong(ROW_ID_COLUMN) > 0) {
+                OrderRow row = createNewOrderRowFromRs(rs);
+                currentOrder.addOrderRow(row);
+            }
+        }
+
+        // Add last order if exists
+        if (currentOrder != null) {
+            orders.add(currentOrder);
+        }
+
+        return orders;
     }
 
     public void deleteOrder(long id) {
