@@ -14,7 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "orders")
-public class Order extends BaseEntity {
+public class Order {
+
+    @Id
+    @SequenceGenerator(name = "my_seq", sequenceName = "seq1", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "my_seq")
+    private Long id;
 
     @NotNull
     @Column(name = "order_number")
@@ -28,6 +33,10 @@ public class Order extends BaseEntity {
     private List<OrderRow> orderRows;
 
     public Order(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public Order(String orderNumber, List<OrderRow> orderRows) {
         this.orderNumber = orderNumber;
     }
 
