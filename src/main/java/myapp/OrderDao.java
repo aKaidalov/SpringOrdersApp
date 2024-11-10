@@ -2,29 +2,21 @@ package myapp;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import model.Order;
-import model.OrderRow;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
 import java.util.*;
 
 @Repository
 public class OrderDao {
 
-    private static final String ORDER_ID_COLUMN = "order_id";
-    private static final String ROW_ID_COLUMN = "row_id";
-
     @PersistenceContext
     private EntityManager em;
 
-
     @Transactional
-    public Order insertOrder(Order order) {
+    public Order saveOrder(Order order) {
         if (order.getId() == null) {
             em.persist(order);
             return order;
@@ -33,132 +25,21 @@ public class OrderDao {
         }
     }
 
-    private void insertOrderRow(long orderId, OrderRow orderRow) {
-
-        String sql = "INSERT INTO order_row (order_id, item_name, quantity, price)" +
-                " VALUES (?, ?, ?, ?)";
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcClient.sql(sql)
-                .param(1, orderId)
-                .param(2, orderRow.getItemName())
-                .param(3, orderRow.getQuantity())
-                .param(4, orderRow.getPrice())
-                .update(keyHolder, "id");
-
-        Long generatedId = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
-
-        if (generatedId != null) {
-            orderRow.setId(generatedId);
-        } else {
-            throw new RuntimeException("Failed to retrieve generated key for OrderRow");
-        }
-    }
-
-
     public Order getOrderById(long id) {
-
-        String sql = "SELECT o.id AS order_id, o.order_number, r.id AS row_id, r.item_name, r.quantity, r.price " +
-                "FROM orderr o " +
-                "LEFT JOIN order_row r ON o.id = r.order_id " +
-                "WHERE o.id = ?";
-
-        return jdbcClient.sql(sql)
-                .param(1, id)
-                .query(rs -> {
-                    return getOrderWithRows(rs);
-                });
-
-    }
-
-    private Order getOrderWithRows(ResultSet rs) throws SQLException {
-        Order order = null;
-
-        while (rs.next()) {
-
-            if (order == null) {
-                order = createOrderFromRs(rs);
-            }
-
-            if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                OrderRow orderRow = createRowFromRs(rs);
-                order.addOrderRow(orderRow);
-            }
-        }
-
-        return order;
+        return em.find(Order.class, id);
     }
 
     public List<Order> getAllOrders() {
-
-        String sql = "SELECT o.id AS order_id, o.order_number, r.id AS row_id, r.item_name, r.quantity, r.price " +
-                "FROM orderr o " +
-                "LEFT JOIN order_row r ON o.id = r.order_id";
-
-        return jdbcClient.sql(sql)
-                .query(rs -> {
-                    return getOrderList(rs);
-                });
+        TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o", Order.class);
+        return query.getResultList();
     }
 
-    private List<Order> getOrderList(ResultSet rs) throws SQLException {
-        List<Order> orders = new ArrayList<>();
-        Order currentOrder = null;
-
-        while (rs.next()) {
-
-            // firstIteration || isNewOrder
-            if (currentOrder == null || rs.getLong(ORDER_ID_COLUMN) != currentOrder.getId()) {
-
-                // Add previous order if exists
-                if (currentOrder != null) {
-                    orders.add(currentOrder);
-                }
-                currentOrder = createOrderFromRs(rs);
-            }
-
-            if (rs.getLong(ROW_ID_COLUMN) > 0) {
-                OrderRow row = createRowFromRs(rs);
-                currentOrder.addOrderRow(row);
-            }
+    @Transactional
+    public void deleteOrderById(long id) {
+        Order order = getOrderById(id);
+        if (order != null) {
+            em.remove(order);
         }
-
-        // Add last order if exists
-        if (currentOrder != null) {
-            orders.add(currentOrder);
-        }
-
-        return orders;
-    }
-
-    private Order createOrderFromRs(ResultSet rs) throws SQLException {
-        return new Order(rs.getLong(ORDER_ID_COLUMN),
-                rs.getString("order_number"),
-                new ArrayList<>());
-    }
-
-    private OrderRow createRowFromRs(ResultSet rs) throws SQLException {
-        return new OrderRow(
-                rs.getLong(ROW_ID_COLUMN),
-                rs.getLong(ORDER_ID_COLUMN),
-                rs.getString("item_name"),
-                rs.getInt("quantity"),
-                rs.getInt("price")
-        );
-    }
-
-    public void deleteOrder(long id) {
-        String sqlDeleteRows = "DELETE FROM order_row WHERE order_id = ?";
-        jdbcClient.sql(sqlDeleteRows)
-                .param(1, id)
-                .update();
-
-
-        String sqlDeleteOrder = "DELETE FROM orderr WHERE id = ?";
-        jdbcClient.sql(sqlDeleteOrder)
-                .param(1, id)
-                .update();
     }
 
 }

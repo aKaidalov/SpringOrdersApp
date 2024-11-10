@@ -14,23 +14,12 @@ import lombok.NoArgsConstructor;
 @Embeddable
 public class OrderRow {
 
+    @Column(name = "item_name")
     private String itemName;
 
-    @NotNull
     @Min(1)
     private int price;
 
-    @NotNull
     @Min(1)
     private int quantity;
-
-    @Column(name = "orders_id")
-    private Long orderId;
-
-    //used in Kalmo's tests
-    public OrderRow(String itemName, int quantity, int price) {
-        this.itemName = itemName;
-        this.quantity = quantity;
-        this.price = price;
-    }
 }

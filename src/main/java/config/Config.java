@@ -15,15 +15,17 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
+@EnableWebMvc
 @EnableTransactionManagement
 @ComponentScan(basePackages = {"myapp", "config"})
 @PropertySource("classpath:/application.properties")
-public class DbConfig {
+public class Config {
 
     @Bean
     public EntityManagerFactory entityManagerFactory(

@@ -17,5 +17,5 @@ CREATE TABLE order_rows (
     quantity INT,
     orders_id BIGINT,
     FOREIGN KEY (orders_id)
-        REFERENCES orders ON DELETE CASCADE
+        REFERENCES orders(id) ON DELETE CASCADE
 );

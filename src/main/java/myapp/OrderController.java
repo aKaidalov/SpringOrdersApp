@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 public class OrderController {
 
-    private OrderDao orderDao;
+    private final OrderDao orderDao;
 
     public OrderController(OrderDao orderDao) {
         this.orderDao = orderDao;
@@ -28,12 +28,12 @@ public class OrderController {
 
     @PostMapping("orders")
     @ResponseStatus(HttpStatus.OK)
-    public Order addOrder(@RequestBody @Valid Order order) {
-        return orderDao.insertOrder(order);
+    public Order saveOrder(@RequestBody @Valid Order order) {
+        return orderDao.saveOrder(order);
     }
 
     @DeleteMapping("orders/{id}")
     public void deleteOrderById(@PathVariable("id") Long orderId) {
-        orderDao.deleteOrder(orderId);
+        orderDao.deleteOrderById(orderId);
     }
 }

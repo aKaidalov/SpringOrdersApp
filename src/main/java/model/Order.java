@@ -4,25 +4,23 @@ import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.With;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-//@With
 @Entity
+@Table(name = "orders")
 public class Order extends BaseEntity {
 
     @NotNull
+    @Column(name = "order_number")
     private String orderNumber;
 
     @Valid
-    @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "order_rows",
             joinColumns = @JoinColumn(name = "orders_id",
