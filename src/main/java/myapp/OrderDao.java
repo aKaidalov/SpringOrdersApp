@@ -1,5 +1,8 @@
 package myapp;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import model.Order;
 import model.OrderRow;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -16,32 +19,18 @@ public class OrderDao {
     private static final String ORDER_ID_COLUMN = "order_id";
     private static final String ROW_ID_COLUMN = "row_id";
 
-    private JdbcClient jdbcClient;
+    @PersistenceContext
+    private EntityManager em;
 
-    public OrderDao(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
-    }
 
+    @Transactional
     public Order insertOrder(Order order) {
-
-        String sql = "INSERT INTO orderr (order_number) VALUES (?)";
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcClient.sql(sql)
-                .param(1, order.getOrderNumber())
-                .update(keyHolder, "id");
-
-        // Create a new Order obj from the updated copy of og order
-        Order updatedOrder = order.withId(keyHolder.getKey().longValue());
-
-        if (updatedOrder.getOrderRows() != null) {
-            for (OrderRow orderRow : updatedOrder.getOrderRows()) {
-                insertOrderRow(updatedOrder.getId(), orderRow);
-            }
+        if (order.getId() == null) {
+            em.persist(order);
+            return order;
+        } else {
+            return em.merge(order);
         }
-
-        return updatedOrder;
     }
 
     private void insertOrderRow(long orderId, OrderRow orderRow) {
@@ -68,8 +57,6 @@ public class OrderDao {
     }
 
 
-    //TODO: replace with only one method to return List<Order>
-    // If id != null -> [Order1] else [allOrders].
     public Order getOrderById(long id) {
 
         String sql = "SELECT o.id AS order_id, o.order_number, r.id AS row_id, r.item_name, r.quantity, r.price " +

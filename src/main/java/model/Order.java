@@ -1,5 +1,6 @@
 package model;
 
+import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -13,17 +14,20 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@With
-public class Order {
-
-    private Long id;
+//@With
+@Entity
+public class Order extends BaseEntity {
 
     @NotNull
     private String orderNumber;
 
     @Valid
     @NotNull
-    private List<OrderRow> orderRows = new ArrayList<>();
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "order_rows",
+            joinColumns = @JoinColumn(name = "orders_id",
+                                        referencedColumnName = "id"))
+    private List<OrderRow> orderRows;
 
     public Order(String orderNumber) {
         this.orderNumber = orderNumber;
