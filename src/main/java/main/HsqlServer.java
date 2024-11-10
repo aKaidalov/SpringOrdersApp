@@ -5,6 +5,7 @@ import org.hsqldb.Server;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Locale;
 
 public class HsqlServer {
 
@@ -33,9 +34,8 @@ public class HsqlServer {
         }
 
         private boolean isSql(String line) {
-            for (String key : List.of("insert", "create",
-                    "select", "alter", "update")) {
-                if (line.toLowerCase().contains(key)) {
+            for (String key : List.of("insert", "create", "select", "alter", "update")) {
+                if (line.toLowerCase(Locale.ROOT).contains(key)) {
                     return true;
                 }
             }
