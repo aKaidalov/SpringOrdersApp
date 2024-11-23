@@ -11,6 +11,11 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
 }
 
+compileJava {
+    options.compilerArgs << '-parameters'
+    // options.compilerArgs < '-g: none'
+}
+
 def jacksonDatabind = '2.17.0'
 def jakartaServletApi = '6.1.0'
 def springVersion = '6.1.14'
@@ -19,6 +24,8 @@ def hibernateValidatorVersion = '8.0.1.Final'
 def lombokVersion = '1.18.34'
 def hsqldbVersion = '2.7.3'
 def aspectjWeaverVersion = '1.9.22'
+def springSecurityVersion = '6.3.4'
+def jsonWebTokenVersion = '0.12.6'
 def postgresVersion = '42.7.3'
 
 dependencies {
@@ -66,6 +73,30 @@ dependencies {
     implementation group: 'org.aspectj',
             name: 'aspectjweaver',
             version: aspectjWeaverVersion
+
+
+    // Security
+    implementation group: 'org.springframework.security',
+            name: 'spring-security-web',
+            version: springSecurityVersion
+
+    implementation group: 'org.springframework.security',
+            name: 'spring-security-config',
+            version: springSecurityVersion
+
+
+    // JWT
+    implementation group: 'io.jsonwebtoken',
+            name: 'jjwt-api',
+            version: jsonWebTokenVersion
+
+    implementation group: 'io.jsonwebtoken',
+            name: 'jjwt-impl',
+            version: jsonWebTokenVersion
+
+    implementation group: 'io.jsonwebtoken',
+            name: 'jjwt-jackson',
+            version: jsonWebTokenVersion
 
 
     // db
