@@ -1,6 +1,6 @@
 package config.security.jwt;
 
-import conf.security.TokenInfo;
+import config.security.TokenInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
