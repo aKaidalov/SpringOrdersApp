@@ -1,11 +1,16 @@
 package config;
 
+import config.security.SecurityConfig;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-public class ApplicationIntiializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+public class ApplicationIntiializer
+        extends AbstractAnnotationConfigDispatcherServletInitializer {
+
     @Override
-    protected String[] getServletMappings() {
-        return new String[] { "/api/*" };
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class[] { MvcConfig.class,
+                             SecurityConfig.class,
+                             HsqlDataSource.class };
     }
 
     @Override
@@ -14,7 +19,7 @@ public class ApplicationIntiializer extends AbstractAnnotationConfigDispatcherSe
     }
 
     @Override
-    protected Class<?>[] getRootConfigClasses() {
-        return new Class[0];
+    protected String[] getServletMappings() {
+        return new String[] { "/api/*" };
     }
 }
