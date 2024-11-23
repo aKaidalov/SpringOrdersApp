@@ -34,8 +34,8 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @PropertySource("classpath:/application.properties")
 public class SecurityConfig {
 
-    @Value("${jwt.signing.key}")
-    private String jwtKey;
+//    @Value("${jwt.signing.key}")
+//    private String jwtKey;
 
     private final MvcRequestMatcher.Builder mvc;
 
@@ -78,19 +78,19 @@ public class SecurityConfig {
         public void configure(HttpSecurity http) {
             AuthenticationManager manager = http.getSharedObject(AuthenticationManager.class);
 
-//            // Use in 1-11 task
-//            var loginFilter = new ApiAuthenticationFilter(
-//                    manager, "/api/login");
+            // Use in 1-11 task
+            var loginFilter = new ApiAuthenticationFilter(
+                    manager, "/api/login");
 
 
-            // Use in 12 task
-            var authorizationFilter = new JwtAuthorizationFilter(jwtKey);
-
-            http.addFilterBefore(authorizationFilter,
-                    AuthorizationFilter.class);
-
-            var loginFilter = new JwtAuthenticationFilter(
-                    manager, "/api/login", jwtKey);
+//            // Use in 12 task
+//            var authorizationFilter = new JwtAuthorizationFilter(jwtKey);
+//
+//            http.addFilterBefore(authorizationFilter,
+//                    AuthorizationFilter.class);
+//
+//            var loginFilter = new JwtAuthenticationFilter(
+//                    manager, "/api/login", jwtKey);
 
             http.addFilterBefore(loginFilter,
                     UsernamePasswordAuthenticationFilter.class);
