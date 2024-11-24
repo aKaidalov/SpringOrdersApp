@@ -39,14 +39,11 @@ public class ApiAuthenticationFilter extends AbstractAuthenticationProcessingFil
             throw new BadCredentialsException("", e);
         }
 
-        System.out.println(loginCredentials.getUsername() + " " + loginCredentials.getPassword());
-
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(
                         loginCredentials.getUsername(),
                         loginCredentials.getPassword());
 
-        System.out.println(token);
         return getAuthenticationManager().authenticate(token);
     }
 }
