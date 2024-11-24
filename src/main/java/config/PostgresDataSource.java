@@ -14,7 +14,7 @@ public class PostgresDataSource {
         ds.setDriverClassName("org.postgresql.Driver");
         ds.setUsername(env.getProperty("postgres.user"));
         ds.setPassword(env.getProperty("postgres.pass"));
-        ds.setUrl(env.getProperty("postgres.url"));
+        ds.setUrl(env.getProperty("dbUrl"));
         return ds;
     }
 

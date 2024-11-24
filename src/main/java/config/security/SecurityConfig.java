@@ -5,7 +5,7 @@ import config.security.handlers.ApiEntryPoint;
 import config.security.handlers.ApiLogoutSuccessHandler;
 import config.security.jwt.JwtAuthenticationFilter;
 import config.security.jwt.JwtAuthorizationFilter;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,8 +34,8 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @PropertySource("classpath:/application.properties")
 public class SecurityConfig {
 
-//    @Value("${jwt.signing.key}")
-//    private String jwtKey;
+    @Value("${jwt.signing.key}")
+    private String jwtKey;
 
     private final MvcRequestMatcher.Builder mvc;
 
@@ -51,13 +51,10 @@ public class SecurityConfig {
         http.formLogin(withDefaults());
 
         http.authorizeHttpRequests(conf -> conf
-                .requestMatchers(mvcMatcher("/home")).permitAll()
-                .requestMatchers(mvcMatcher("/admin/**")).hasRole("ADMIN")
-                .requestMatchers(mvcMatcher("/**")).authenticated()
-                .requestMatchers(antMatcher("/static/**")).permitAll());
-
-
-//        http.logout(conf -> conf.logoutUrl("/api/logout"));
+                .requestMatchers(mvcMatcher("/version")).permitAll()
+                .requestMatchers(mvcMatcher("/login")).permitAll()
+                .requestMatchers(antMatcher("/static/**")).permitAll()
+                .requestMatchers(mvcMatcher("/**")).authenticated());
 
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -72,25 +69,19 @@ public class SecurityConfig {
         return http.build();
     }
 
-    public static class FilterConfigurer extends AbstractHttpConfigurer<FilterConfigurer, HttpSecurity> {
+    public class FilterConfigurer extends AbstractHttpConfigurer<FilterConfigurer, HttpSecurity> {
 
         @Override
         public void configure(HttpSecurity http) {
             AuthenticationManager manager = http.getSharedObject(AuthenticationManager.class);
 
-            // Use in 1-11 task
-            var loginFilter = new ApiAuthenticationFilter(
-                    manager, "/api/login");
+            var authorizationFilter = new JwtAuthorizationFilter(jwtKey);
 
+            http.addFilterBefore(authorizationFilter,
+                    AuthorizationFilter.class);
 
-//            // Use in 12 task
-//            var authorizationFilter = new JwtAuthorizationFilter(jwtKey);
-//
-//            http.addFilterBefore(authorizationFilter,
-//                    AuthorizationFilter.class);
-//
-//            var loginFilter = new JwtAuthenticationFilter(
-//                    manager, "/api/login", jwtKey);
+            var loginFilter = new JwtAuthenticationFilter(
+                    manager, "/api/login", jwtKey);
 
             http.addFilterBefore(loginFilter,
                     UsernamePasswordAuthenticationFilter.class);
@@ -101,13 +92,13 @@ public class SecurityConfig {
     public UserDetailsService userDetailService() {
         UserDetails user = User.builder()
                 .username("user")
-                .password("$2a$10$CEjgArcc/SVv1UIVfLVwS.7KZQZ6TaQoh13cTr6GCTTIjhee8TPLO") // password: 123
+                .password("$2a$10$WhhGqG4B6qQujiQhAZbw0ebPmV/jVSaS64P2WZ9pgi5G3tzJ3mwZi") // password: user
                 .roles("USER")
                 .build();
 
         UserDetails admin = User.builder()
                 .username("admin")
-                .password("$2a$10$WYpToaEC47cO0MY0mwMqJ.Vs79talyCtFCU7dANjh1n9BYBpu..Ju") // password: 123
+                .password("$2a$10$YQ/hmpz0XgKH1Lz0eTHE4eFqLekQIg5AhtKpSUO6qCsDYcFzrey8a") // password: admin
                 .roles("USER", "ADMIN")
                 .build();
 

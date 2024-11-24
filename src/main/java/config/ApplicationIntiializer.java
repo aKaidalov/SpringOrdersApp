@@ -10,12 +10,13 @@ public class ApplicationIntiializer
     protected Class<?>[] getRootConfigClasses() {
         return new Class[] { MvcConfig.class,
                              SecurityConfig.class,
+                             Config.class,
                              HsqlDataSource.class };
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[] { Config.class };
+        return new Class[] {};
     }
 
     @Override

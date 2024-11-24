@@ -1,5 +1,10 @@
 package user;
 
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
 public class UserDao {
 
     public User getUserByUserName(String userName) {
@@ -9,5 +14,9 @@ public class UserDao {
             case "bob" -> new User("bob", "Bob Jones");
             default -> null;
         };
+    }
+
+    public List<String> getAllUsers() {
+        return List.of(getUserByUserName("user").toString());
     }
 }

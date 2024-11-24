@@ -7,27 +7,24 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.List;
+
+import static org.springframework.security.authorization.AuthorityReactiveAuthorizationManager.hasRole;
 
 @RestController
 public class UserController {
 
+
+    private final UserDao userDao;
+
+
+    public UserController(UserDao userDao) {
+        this.userDao = userDao;
+    }
+
     @GetMapping("/")
     public String frontPage() {
         return "Front page!";
-    }
-
-    @GetMapping("/count")
-    public String counter(HttpSession session) {
-
-        Object count = session.getAttribute("count");
-
-        count = count instanceof Integer i
-                ? i + 1
-                : 0;
-
-        session.setAttribute("count", count);
-
-        return String.valueOf(count);
     }
 
     @GetMapping("/home")
@@ -48,8 +45,17 @@ public class UserController {
     }
 
     @GetMapping("/users/{username}")
-    @PreAuthorize("#username == authentication.name")
+    @PreAuthorize("#username == authentication.name || hasRole('ROLE_ADMIN')")
     public User getUserByName(@PathVariable("username") String username) {
-        return new UserDao().getUserByUserName(username);
+        return userDao.getUserByUserName(username);
     }
+
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<String> getUsers() {
+        return userDao.getAllUsers();
+    }
+
+    @GetMapping("/version")
+    public String version() {return "?";}
 }
